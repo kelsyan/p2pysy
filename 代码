@@ -1,0 +1,357 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <conio.h>
+
+#define P 11
+#define NULLKEY 0
+#define MAX 20
+#define lenth 13  //哈希表长
+int sum=0,k=0;
+
+//用链地址法定义
+typedef struct employee
+{
+    int key_code;
+
+    struct employee *next;
+}Employee;
+
+
+typedef struct hashtable
+{
+    int key;
+
+    struct employee *next;
+}HashTable[MAX];
+
+
+int Hash(int key)
+{
+    int mode = key % P;
+
+    return mode;
+}
+
+
+void logo()
+{
+    printf("\t\t\t***************************\n");
+    printf("\t\t\t     Basic operation of hash table\n");
+    printf("\n");
+    printf("\t\t\t***************************\n");
+    printf("\n");
+}
+
+
+void Hash_Init(HashTable ht)
+{
+    int i;
+    for(i=0;i<MAX;i++)
+    {
+        ht[i].key = NULLKEY;
+        ht[i].next = NULL;
+    }
+}
+
+
+int Hash_Insert(HashTable ht,Employee *em)
+{
+    int key = Hash(em->key_code);
+    Employee *p;
+    p = (Employee*)malloc(sizeof(Employee));
+    if(ht[key].key == NULLKEY)
+    {
+        ht[key].key = key;
+        ht[key].next = em;
+        k++;
+    }
+    else if(ht[key].key == key)
+    {
+        p = ht[key].next;
+        k++;
+
+        while(p->next != NULL)
+        {
+            p = p->next;
+            k++;
+        }
+        p->next = em;
+        k++;
+    }
+    return 1;
+}
+
+
+Employee* Hash_Search(HashTable ht,int key)
+{
+    int p0 = Hash(key);
+
+    if(ht[p0].key == NULLKEY)
+    {
+        sum++;
+        return NULL;
+    }
+    else if(ht[p0].key == p0)
+    {
+        Employee  *p = ht[p0].next;
+        while (p != NULL)
+        {
+            if (p->key_code == key)
+            {
+                sum++;
+                return p;
+            }
+
+            p = p->next;
+            sum++;
+            
+        }
+        
+    }
+    return NULL;
+    
+}
+
+//除数余留法
+int Hash_Create(HashTable ht)
+{
+    int i;
+
+    Employee *em;
+    Hash_Init(ht);
+    printf("Please enter data:");
+    for ( i = 0; i < 8; i++)
+    {
+        em = (Employee *)malloc(sizeof(Employee));
+
+        scanf("%d",&em->key_code);
+        em->next = NULL;
+
+        Hash_Insert(ht,em);
+    }
+
+    printf("\nCreate Successfully!\n");
+
+    return 1;
+    
+}
+
+void ConFun()
+{
+    printf("Please press any key to continue.....");
+    getch();
+}
+
+
+void Introduction()
+{
+    printf("In the hash table, there are many ways to construct hash functions, and different ways to solve conflicts for the same hash function. The two are the key factors affecting the performance of query algorithms. For several typical hash function construction methods, do experiments to observe the impact of different conflict resolution methods on query performance.");
+    printf("\n");
+    ConFun();
+}
+
+
+int hash_output(HashTable h)
+{
+    Employee *a;
+    int i,j,count2 = 0;
+    a = (Employee*)malloc(sizeof(Employee));
+    j=0;
+    for ( i = 0; i < lenth; i++)
+    {
+        printf("%4d",i);
+        printf("%4d",h[i].key);
+        if (h[i].next!=0)
+        {
+            count2++;
+        }
+            j=1;
+            a=h[i].next;
+        
+        while (a)
+        {
+            printf("->%d",(*a).key_code);
+            a=(*a).next;
+            j++;
+            count2+=j;
+        }
+
+        printf("\n");        
+        
+    }
+
+    return count2;
+    
+}
+
+
+void Hash_Link()
+{
+    int key;
+    Employee *em;
+    HashTable ht;
+    Hash_Create(ht);
+    hash_output(ht);
+    printf("count=%d\n",k);
+    printf("ASL=%d/8\n",k);
+    printf("Please enter the data to find:");
+    scanf("%d",&key);
+    em = Hash_Search(ht,key);
+    printf("Number of lookups:%d\n",sum);
+    if (em != NULL)
+    {
+        printf("Search succeeded!");
+    }
+    else
+    {
+        printf("Search unsuccessful!");
+    }
+    ConFun();
+    
+}
+
+
+void hash_create(int h[],int status[],int data)
+{
+    int address;
+    int di;
+    address = data % P;
+    if (status[address]==0)
+    {
+        h[address] = data;
+        status[address] = 1;
+    }
+    else
+    {
+        for ( di = 1; di < lenth-1; di++)
+        {
+            address = ((data % P)+ di)%lenth;
+            if (status[address]==0)
+            {
+                h[address] = data;
+                status[address] = 1;
+                break;
+            }
+            
+        }
+        
+    } 
+}
+
+
+int hash_search(int h[],int key)
+{
+    int address,di;
+    address = key % P;
+
+    if (h[address] == key)
+    {
+        return 1;
+    }
+    else
+    {
+        for ( di = 1; di < lenth-1; di++)
+        {
+            address = ((key%P)+di)%lenth;
+            if (h[address] == key)
+            {
+                return di+1;
+
+                break;
+            }
+            
+        }
+        
+    }
+    if (di>=lenth)
+    {
+        return 0;
+    }    
+}
+
+
+void Hash_Divided()
+{
+    int h[lenth] = {0};       //初始哈希表
+    int status[lenth] = {0};  //状态数组
+    int count=0;
+    int data[8] = {0};
+    int i,ALS;
+    printf("Please enter data:");
+    for ( i = 0; i < 8; i++)
+    {
+        scanf("%d",&data[i]);
+    }
+    
+    for ( i = 0; i < 8; i++)
+    {
+        hash_create(h,status,data[i]);
+        printf("please putout the data:\n");
+    }
+    for ( i = 0; i < lenth; i++)
+    {
+        printf("%5d",h[i]);
+    }
+    printf("\n");
+    for ( i = 0; i < 8; i++)
+    {
+        count+=hash_search(h,data[i]);
+    }
+    printf("count=%5d\n",count);
+    printf("the result of ALS is:\n");
+    ALS = count/8;
+    printf("ALS=%d\n",ALS);
+    ConFun(); 
+}
+
+
+void SelectModel()
+{
+    int i;
+
+    do
+    {
+        system("cls");
+        logo();
+        system("color 1e");
+        fflush(stdin);
+        printf("\t(1):Course design requirements\n");
+        printf("\n");
+        printf("\t(2):Create hash table with divisor residue method\n");
+        printf("\n");
+        printf("\t(3):Chain address method to create hash table\n");
+        printf("\n");
+        printf("\t(4):Exit the system\n");
+        printf("\n");
+        printf("\t          Please select serial number");
+        scanf("%d",&i);
+        switch (i)
+        {
+        case 1:Introduction();break;
+        case 2:Hash_Divided();break;
+        case 3:Hash_Link();break;
+        case 4:
+        {
+            printf("Thanks for using\n");
+            exit(0);
+        }
+        
+        default:
+        {
+            printf("\t Please enter 1-4\n");
+            ConFun();
+            break;
+        }
+
+    }
+	}while (1);
+    
+
+}
+
+
+void main()
+{
+    SelectModel();
+}
